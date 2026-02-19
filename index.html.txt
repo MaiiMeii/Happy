@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chúc Mừng Sinh Nhật Em Yêu</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f001a, #1a0033, #330066);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 4vw 5vw;
+            max-width: 95%;
+            width: 100%;
+        }
+        h1 {
+            color: #ff69b4;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            text-shadow: 0 0 20px #ff1493, 0 0 40px #c2185b;
+            margin: 2vh 0;
+            cursor: pointer;
+        }
+        .subtitle {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            color: #ff99cc;
+            margin-bottom: 5vh;
+        }
+        .cake {
+            font-size: clamp(8rem, 25vw, 14rem);
+            margin: 3vh 0;
+            animation: beat 2s infinite;
+            cursor: pointer;
+            display: inline-block;
+        }
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+        p.final {
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            margin-top: 6vh;
+            color: #ffb6c1;
+        }
+        /* Nút âm thanh responsive */
+        #musicToggle {
+            position: fixed;
+            top: 2vh;
+            right: 2vw;
+            z-index: 100;
+            background: rgba(255, 105, 180, 0.7);
+            border: none;
+            border-radius: 50%;
+            width: clamp(45px, 10vw, 60px);
+            height: clamp(45px, 10vw, 60px);
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.5);
+            transition: all 0.3s;
+        }
+        #musicToggle:hover {
+            transform: scale(1.1);
+            background: #ff69b4;
+        }
+        /* Popup Modal responsive */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: rgba(255, 105, 180, 0.15);
+            backdrop-filter: blur(15px);
+            margin: 8vh auto;
+            padding: 5vw;
+            border: 2px solid #ff69b4;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 25px;
+            box-shadow: 0 0 40px rgba(255, 105, 180, 0.6);
+            text-align: center;
+            color: #fff;
+            animation: fadeIn 0.8s;
+        }
+        @keyframes fadeIn {
+            from {opacity: 0; transform: scale(0.85);}
+            to {opacity: 1; transform: scale(1);}
+        }
+        .close {
+            color: #ff69b4;
+            float: right;
+            font-size: clamp(2.5rem, 8vw, 3.5rem);
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .close:hover {
+            color: #fff;
+        }
+        .modal h2 {
+            color: #ff3366;
+            font-size: clamp(2rem, 6vw, 3rem);
+            margin: 3vh 0;
+            text-shadow: 0 0 15px #ff1493;
+        }
+        .modal .message {
+            font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+            line-height: 1.7;
+            margin: 3vh 0;
+        }
+        .heart {
+            color: #ff3366;
+            font-size: clamp(1.5rem, 5vw, 2rem);
+        }
+
+        /* Media queries cho màn hình nhỏ */
+        @media (max-width: 600px) {
+            .container { padding: 5vw 4vw; }
+            .cake { margin: 4vh 0; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <!-- Nhạc nền -->
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2025/12/21/audio_8932415a99.mp3?filename=moodmode-happy-birthday-song-455067.mp3" type="audio/mpeg">
+        Trình duyệt không hỗ trợ audio.
+    </audio>
+
+    <!-- Nút bật/tắt nhạc -->
+    <button id="musicToggle" onclick="toggleMusic()">🔇</button>
+
+    <div class="container">
+        <h1 onclick="shootConfetti()">Chúc Mừng Sinh Nhật Em Yêu 🎂💕</h1>
+        <div class="subtitle">Ngày em ra đời + ngày chúng ta quen nhau</div>
+        
+        <div class="cake" onclick="openPopup()">🎂</div>
+        
+        <p class="final">Nhấn vào bánh kem để mở nhé em yêu! 💖🎉</p>
+    </div>
+
+    <!-- Popup Modal -->
+    <div id="wishModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <h2>Em Yêu Của Anh❤️</h2>
+            <div class="message">
+                Hôm nay là ngày em chào đời, cũng là ngày định mệnh chúng ta quen nhau – hai khoảnh khắc đẹp nhất đời anh.<br><br>
+                
+                Anh chúc em tuổi mới tràn đầy niềm vui, sức khỏe dồi dào, luôn xinh đẹp rạng ngời như nụ cười em dành cho anh mỗi ngày.<br>
+                Cảm ơn em vì đã là ánh sáng, là hạnh phúc lớn nhất trong cuộc đời anh.<br><br>
+                
+                Thời gian trôi nhanh, nhưng tình yêu anh dành cho em vẫn vẹn nguyên: hồi hộp, ngọt ngào và chân thành như ngày đầu.<br>
+                Anh sẽ mãi bên em, nắm chặt tay nhau qua mọi chặng đường, gọi em là "em yêu" mỗi ngày.<br><br>
+                
+                Yêu em nhiều lắm, nhiều hơn cả những vì sao trên bầu trời đêm nay! 💗🌟
+            </div>
+            <p class="heart">Mãi mãi bên em nhé! ❤️</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+    <script>
+        const music = document.getElementById('bgMusic');
+        const toggleBtn = document.getElementById('musicToggle');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                music.pause();
+                toggleBtn.textContent = '🔇';
+            } else {
+                music.volume = 0.4;
+                music.play().catch(() => console.log("Auto-play bị chặn"));
+                toggleBtn.textContent = '🎵';
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function shootConfetti() {
+            const isMobile = window.innerWidth < 768;
+            confetti({
+                particleCount: isMobile ? 80 : 120,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ff69b4', '#ff3366', '#c2185b', '#e91e63', '#f06292', '#ffb6c1', '#ffffff'],
+                ticks: 300
+            });
+        }
+
+        function shootConfettiBig() {
+            const isMobile = window.innerWidth < 768;
+            const count = isMobile ? 150 : 250;
+            const defaults = { origin: { y: 0.6 } };
+
+            function fire(ratio, opts) {
+                confetti({
+                    ...defaults,
+                    ...opts,
+                    particleCount: Math.floor(count * ratio),
+                    colors: ['#ff0', '#f00', '#0f0', '#00f', '#ff69b4', '#ff1493', '#c2185b', '#ffffff']
+                });
+            }
+
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92 });
+        }
+
+        function startConfettiRain() {
+            const duration = 8000;
+            const end = Date.now() + duration;
+            const isMobile = window.innerWidth < 768;
+            const interval = setInterval(() => {
+                if (Date.now() > end) {
+                    clearInterval(interval);
+                    return;
+                }
+                confetti({
+                    particleCount: isMobile ? 3 : 6,
+                    angle: 90,
+                    spread: 45,
+                    startVelocity: 0,
+                    origin: { x: Math.random(), y: -0.1 },
+                    gravity: 0.6,
+                    drift: Math.random() * 1 - 0.5,
+                    ticks: 250,
+                    scalar: 0.8,
+                    colors: ['#ff69b4', '#ff3366', '#ffb6c1', '#ffffff', '#ff1493']
+                });
+            }, isMobile ? 600 : 400);
+        }
+
+        function openPopup() {
+            document.getElementById('wishModal').style.display = "block";
+            shootConfettiBig();
+            startConfettiRain();
+            if (!isPlaying) {
+                toggleMusic();
+            }
+        }
+
+        function closePopup() {
+            document.getElementById('wishModal').style.display = "none";
+            shootConfettiBig();
+            startConfettiRain();
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('wishModal');
+            if (event.target == modal) {
+                closePopup();
+            }
+        }
+
+        // Responsive canvas confetti (tự resize khi thay đổi kích thước màn hình)
+        function resizeCanvas() {
+            const canvas = document.getElementById('canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas(); // Gọi lần đầu
+
+        // Confetti nhẹ khi load
+        window.onload = () => {
+            setTimeout(shootConfetti, 800);
+        };
+    </script>
+</body>
+</html>
